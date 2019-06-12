@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JAVA基于SSM框架实现简历生成 </title>
+    <!--element css-->
+    <link rel="stylesheet" href="css/index.css">
+    <!--引入vue  一定要在element js之前引入-->
+    <script src="js/vue.js"></script>
+    <!--引入element js-->
+    <script src="js/index.js"></script>
+    <!--引入axios-->
+    <script src="js/axios.js"></script>
+</head>
+<body>
+<div id="app">
+
+    <el-button type="primary" @click="dialogVisible = true">New Resume</el-button>
+    <!--新建/更新简历开始-->
+    <el-dialog title="简历" width="60%"
+               :visible.sync="dialogVisible"
+               :before-close="cancel">
+        <el-form :model="form" :inline="true" class="demo-form-inline" ref="form">
+            <el-tag>Basic Information</el-tag>
+            <br>
+            <el-form-item label="name" prop="name" label-width="100px">
+                <el-input size="mini" v-model="form.name" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="gender" prop="gender" label-width="100px">
+                <el-select size="mini" v-model="form.gender" style="width: 175px">
+                    <el-option v-for="item in genderList" :key="item.value" :label="item.value" :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="age" prop="age" label-width="100px">
+                <el-input size="mini" v-model.number="form.age" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="address" prop="address" label-width="100px">
+                <el-input size="mini" v-model.number="form.address" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="email" prop="email" label-width="100px">
+                <el-input size="mini" v-model.number="form.email" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="tel" prop="tel" label-width="100px">
+                <el-input size="mini" v-model.number="form.tel" auto-complete="off"></el-input>
+            </el-form-item>
+            <br>
+            <el-tag>Educational Information</el-tag>
+            <br>
+            <el-form-item label="major" prop="major" label-width="100px">
+                <el-input size="mini" v-model.number="form.major" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="education" prop="education" label-width="100px">
+                <el-input size="mini" v-model.number="form.education" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="school" prop="school" label-width="100px">
+                <el-input size="mini" v-model.number="form.school" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="graduation" prop="graduation" label-width="100px">
+                <el-input size="mini" v-model.number="form.graduation" auto-complete="off"></el-input>
+            </el-form-item>
+            <br>
+            <el-tag>Work Experience</el-tag>
+            <br>
+            <el-form-item label="company" prop="company" label-width="100px">
+                <el-input size="mini" v-model.number="form.company" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="position" prop="position" label-width="100px">
+                <el-input size="mini" v-model.number="form.position" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="duty" prop="duty" label-width="100px">
+                <el-input size="mini" v-model.number="form.duty" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="departure" prop="departure" label-width="100px">
+                <el-input size="mini" v-model.number="form.departure" auto-complete="off"></el-input>
+            </el-form-item>
+            <br>
+            <el-tag>Introduce</el-tag>
+            <br>
+            <el-form-item label="introduce" prop="introduce" label-width="100px">
+                <el-input size="mini" type="textarea" style="width: 600px" v-model.number="form.introduce"
+                          auto-complete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click.stop="cancel()" size="mini">Cancel</el-button>
+            <el-button type="primary" @click.stop="handle()" size="mini">Submit</el-button>
+        </div>
+    </el-dialog>
+    <!--新建/更新简历结束-->
+
+    <!--展示信息开始-->
+    <template>
+        <el-table :data="list" v-loading="loading"
+                  row-key="id"
+                  stripe style="width: 100%" reserve-selection="true">
+            <el-table-column type="selection"></el-table-column>
+            <el-table-column prop="id" label="id"></el-table-column>
+            <el-table-column prop="name" label="name"></el-table-column>
+            <el-table-column prop="gender" label="gender"></el-table-column>
+            <el-table-column prop="age" label="age"></el-table-column>
+            <el-table-column prop="address" label="address"></el-table-column>
+            <el-table-column prop="email" label="email"></el-table-column>
+            <el-table-column prop="tel" label="tel"></el-table-column>
+            <el-table-column prop="introduce" label="introduce"></el-table-column>
+            <el-table-column label="operating" align="center">
+                <template slot-scope="scope">
+                    <el-button-group>
+                        <el-button @click.stop="handleEdit(scope.$index, scope.row)" type="default" icon="el-icon-edit"
+                                   size="mini">Edit
+                        </el-button>
+                        <el-button @click.stop="handleDelete(scope.$index, scope.row)" type="default"
+                                   icon="el-icon-delete"
+                                   size="mini">Delete
+                        </el-button>
+                        <el-button @click.stop="handleDownload(scope.$index, scope.row)" type="default"
+                                   icon="el-icon-download"
+                                   size="mini">Download
+                        </el-button>
+                    </el-button-group>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+    <!--展示信息结束-->
+</div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                genderList: [
+                    {value: "boy"},
+                    {value: "girl"}
+                ],
+                expands: [],
+                dialogVisible: false,
+                loading: true,
+                list: [],
+                editOrAdd: "add",
+                form: {
+                    id: null,
+                    name: "",
+                    gender: null,
+                    age: null,
+                    address: null,
+                    email: null,
+                    tel: null,
+                    introduce: '',
+                    major: null,
+                    education: null,
+                    school: null,
+                    graduation: null,
+                    company: "",
+                    position: "",
+                    duty: null,
+                    departure: ""
+                },
+                addOrEdit: "add"
+            }
+        },
+        created() {
+            Vue.prototype.axios = axios;
+            //在页面渲染时获取表单数据
+            this.getList();
+        },
+        methods: {
+            //获取表单数据
+            getList() {
+                //设置请求路径
+                const url = "./list";
+                this.loading = true;
+                // 响应成功以后会执行then方法中的回调函数
+                axios.get(url).then(function (result) {
+                    this.list = result.data.data;
+                    this.loading = false;
+                }.bind(this));
+            },
+            //添加简历
+            handleAdd() {
+                //打开对话框
+                this.dialogVisible = true;
+                this.addOrEdit = 'add';
+            },
+            //处理添加和更新
+            handle(index, row) {
+                if (this.addOrEdit === 'add') {
+                    //请求地址
+                    const url = "./add";
+                    //使用axios发送请求，就和ajax一样
+                    this.axios({
+                        //请求方法
+                        method: 'post',
+                        url: url,
+                        //请求数据
+                        data: this.form
+                    }).then(function (result) {
+                        //消息提示框
+                        //result为后端的响应数据
+                        this.$notify({
+                            title: result.data.code,
+                            message: result.data.message,
+                            type: 'info'
+                        });
+                        if (result.data.code === 200) {
+                            this.resetForm();
+                            this.dialogVisible = false;
+                            this.getList();
+                        }
+                    }.bind(this));
+                } else if (this.addOrEdit === "edit") {
+                    const url = "./update";
+                    this.axios({
+                        method: 'post',
+                        url: url,
+                        data: this.form
+                    }).then(function (result) {
+                        //消息提示框
+                        this.$notify({
+                            title: result.data.code,
+                            message: result.data.message,
+                            type: 'info'
+                        });
+                        if (result.data.code === 200) {
+                            this.resetForm();
+                            this.dialogVisible = false;
+                            this.getList();
+                        }
+                    }.bind(this));
+                }
+            },
+            //重置表单
+            resetForm() {
+                this.form = {
+                    id: null,
+                    name: "",
+                    gender: null,
+                    age: null,
+                    address: null,
+                    email: null,
+                    tel: null,
+                    introduce: '',
+                    major: null,
+                    education: null,
+                    school: null,
+                    graduation: null,
+                    company: "",
+                    position: "",
+                    duty: null,
+                    departure: ""
+                }
+            },
+            //取消
+            cancel() {
+                this.dialogVisible = false;
+                this.resetForm();
+            },
+            //删除
+            handleDelete(index, row) {
+                this.$confirm("确认删除该简历吗？", "提示", {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning"
+                }).then(() => {
+                    const url = "./delete";
+                    this.axios({
+                        method: 'post',
+                        url: url,
+                        data: {
+                            id: row.id,
+                        }
+                    }).then(function (result) {
+                        //消息提示框
+                        this.$notify({
+                            title: result.data.code,
+                            message: result.data.message,
+                            type: 'info'
+                        });
+                        //删除成功，刷新页面
+                        if (result.data.code === 200) {
+                            this.getList();
+                        }
+                    }.bind(this));
+                });
+            },
+            //编辑更新简历
+            handleEdit(index, row) {
+                this.loading = false;
+                this.form.id = row.id;
+                this.form.name = row.name;
+                this.form.gender = row.gender;
+                this.form.age = row.age;
+                this.form.address = row.address;
+                this.form.email = row.email;
+                this.form.tel = row.tel;
+                this.form.introduce = row.introduce;
+                this.form.major = row.major;
+                this.form.education = row.education;
+                this.form.school = row.school;
+                this.form.graduation = row.graduation;
+                this.form.company = row.company;
+                this.form.position = row.position;
+                this.form.duty = row.duty;
+                this.form.departure = row.departure;
+                this.dialogVisible = true;
+                this.addOrEdit = "edit";
+            },
+            //下载简历
+            handleDownload(index, row) {
+                window.location.href = "./download?id=" + row.id;
+            }
+        }
+
+    })
+</script>
+</html>

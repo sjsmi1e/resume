@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.resume.mapper.ResumeMapper">
+    <insert id="add" parameterType="resume">
+        insert into `resume` (`name`,
+                              gender,
+                              age,
+                              address,
+                              email,
+                              tel,
+                              introduce,
+                              major,
+                              education,
+                              school,
+                              graduation,
+                              company,
+                              position,
+                              duty,
+                              departure)
+        VALUES (#{name},
+                #{gender},
+                #{age},
+                #{address},
+                #{email},
+                #{tel},
+                #{introduce},
+                #{major},
+                #{education},
+                #{school},
+                #{graduation},
+                #{company},
+                #{position},
+                #{duty},
+                #{departure})
+    </insert>
+    <update id="update" parameterType="resume">
+        update `resume`
+        <set>
+            <if test="name!=null">
+                `name`=#{name},
+            </if>
+            <if test="gender!=null">
+                gender=#{gender},
+            </if>
+            <if test="age!=null">
+                age=#{age},
+            </if>
+            <if test="address!=null">
+                address=#{address},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="tel!=null">
+                tel=#{tel},
+            </if>
+            <if test="introduce!=null">
+                introduce=#{introduce},
+            </if>
+            <if test="major!=null">
+                major=#{major},
+            </if>
+            <if test="education!=null">
+                education=#{education},
+            </if>
+            <if test="school!=null">
+                school=#{school},
+            </if>
+            <if test="graduation!=null">
+                graduation=#{graduation},
+            </if>
+            <if test="company!=null">
+                company=#{company},
+            </if>
+            <if test="position!=null">
+                position=#{position},
+            </if>
+            <if test="duty!=null">
+                duty=#{duty},
+            </if>
+            <if test="departure!=null">
+                departure=#{departure},
+            </if>
+        </set>
+        where id=#{id}
+
+    </update>
+    <delete id="delete" parameterType="int">
+        delete
+        from resume
+        where id = #{id}
+    </delete>
+    <select id="list" resultType="resume">
+        select *
+        from resume;
+    </select>
+    <select id="findById" resultType="resume">
+        select *
+        from resume
+        where id = #{id}
+    </select>
+</mapper>
